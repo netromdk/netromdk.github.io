@@ -2,7 +2,6 @@
 layout: post
 title:  "Hello, World!"
 date:   2016-08-29 21:44:24 +0200
-categories: update
 ---
 
 I moved my blog to [GitHub Pages][gh-pages] using [Jekyll][jekyll] as the static page
