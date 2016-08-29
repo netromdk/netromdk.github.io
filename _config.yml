@@ -1,0 +1,11 @@
+title: nullpointer.dk
+email:
+description: Programming, security, and technobabble..
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "http://nullpointer.dk" # the base hostname & protocol for your site
+twitter_username: netromdk
+github_username:  netromdk
+
+# Build settings
+markdown: kramdown
+theme: minima
