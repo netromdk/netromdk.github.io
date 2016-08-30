@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Profiling with Intruments.app"
+title:  "Profiling with Instruments.app"
 date:   2013-02-02 23:23:13 +0200
 ---
 
