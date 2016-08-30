@@ -3,3 +3,4 @@ highlighter: rouge
 url: http://nullpointer.dk
 lsi: false
 exclude: [LICENSE, CNAME, README.md, .gitignore, Gemfile, Gemfile.lock]
+markdown: kramdown
