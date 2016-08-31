@@ -2,6 +2,7 @@
 layout: post
 title:  "Unleashing the Power of GDB"
 date:   2013-02-12 01:33:30 +0200
+tags:   gdb debugging c++ gcc
 ---
 
 The GNU Debugger<a href="http://sourceware.org/gdb/current/onlinedocs/gdb/index.html#Top" target="_blank"><sup>[1]</sup></a> is my favorite debugging tool and I personally think it's essential for any *nix developer to know how to use it properly if you're working with C/C++, D, Go, Obj-C, Fortran, Pascal, Modula-2 or Ada<a href="http://sourceware.org/gdb/current/onlinedocs/gdb/Supported-Languages.html#Supported-Languages"><sup>[2]</sup></a>.

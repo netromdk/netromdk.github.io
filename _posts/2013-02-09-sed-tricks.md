@@ -2,6 +2,7 @@
 layout: post
 title:  "sed tricks"
 date:   2013-02-09 16:05:04 +0200
+tags:   sed bsd gnu
 ---
 
 The <strong>s</strong>tream <strong>ed</strong>itor, most commonly know as <b>sed</b>, is a wonderful tool for modifying data from files and stdin. <em>In this article I will be using the BSD variant of sed which is a little bit different from the GNU variant of sed but I will try to point out where the differences are in my examples.</em> 

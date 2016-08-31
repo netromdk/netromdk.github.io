@@ -2,6 +2,7 @@
 layout: post
 title:  "Proper multithreading with Qt"
 date:   2013-03-06 16:13:10 +0200
+tags:   qt concurrency
 ---
 
 <strong>QThread</strong> should be viewed as the mediator with the OS of the new thread and not as being the actual thread itself!

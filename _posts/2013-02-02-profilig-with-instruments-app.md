@@ -2,6 +2,7 @@
 layout: post
 title:  "Profiling with Instruments.app"
 date:   2013-02-02 23:23:13 +0200
+tags:   profiling c++
 ---
 
 Profiling binaries is essential in any serious development process. Unfortunately not very many good profilers exist out there. I usually employ [Valgrind][valgrind] to detect memory leaks and the front-end [KCachegrind][kcachegrind] to inspect call stacks. But KCachegrind requires both X11 and KDE3 libs which I want to avoid. However, last week I discovered <span style="text-decoration: underline;">Instruments.app</span> that comes with Xcode. It's a great profiler with lots of different modes, like detecting memory leaks, tracking heap allocations, detection of "zombie" objects, time-based profiling, performance monitor counter (PMC) based sampling, event-based sampling, file activity, sudden termination analysis and much more. <em>But Instruments.app is not good at finding uninitialized variables like Valgrind is among other things - so this is not a direct substitution!</em>

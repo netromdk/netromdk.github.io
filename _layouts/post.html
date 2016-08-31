@@ -7,6 +7,11 @@ layout: default
   <a href="/">
     <i class="home fa fa-home"></i>
   </a>
+  <br/>
+  Tags:
+  {% for tag in page.tags %}
+    <a href="/tag/{{ tag }}" class="tag">{{ tag }}</a>
+  {% endfor %}
 </p>
 
 <h1 class="title">{{ page.title }}</h1>

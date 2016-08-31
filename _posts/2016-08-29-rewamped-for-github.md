@@ -2,6 +2,7 @@
 layout: post
 title:  "Rewamped for GitHub"
 date:   2016-08-29 21:44:24 +0200
+tags:   github-pages jekyll
 ---
 
 I moved my blog to [GitHub Pages][gh-pages] using [Jekyll][jekyll] as the static page generator. The

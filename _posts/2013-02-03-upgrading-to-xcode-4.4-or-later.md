@@ -2,6 +2,7 @@
 layout: post
 title:  "Upgrading to Xcode 4.4 or later"
 date:   2013-02-03 22:13:56 +0200
+tags:   xcode
 ---
 
 Xcode moved to the App Store as of version 4.4 and it had certain consequences to the common programmer. First of all, the SDKs are no longer located at "/Developer/SDKs" like they were before. The app is located at "/Applications/Xcode.app" on a default install and it contains the SDKs in the directory:
