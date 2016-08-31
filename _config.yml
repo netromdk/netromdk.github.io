@@ -1,7 +1,14 @@
 # General Jekyll Config
-highlighter: rouge
 url: http://nullpointer.dk
-lsi: false
-exclude: [LICENSE, CNAME, README.md, .gitignore, Gemfile, Gemfile.lock]
+
+# Handling reading
+exclude: [CNAME, .gitignore, Gemfile, Gemfile.lock]
+encoding: "utf-8"
+
+# Conversion
 markdown: kramdown
+highlighter: rouge
+
+# Outputting
 permalink: pretty
+timezone: "Europe/Copenhagen"
