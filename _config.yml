@@ -1,6 +1,14 @@
 # General Jekyll Config
 url: http://nullpointer.dk
 
+# Where things are
+source:       .
+destination:  ./_site
+plugins_dir:  _plugins
+layouts_dir:  _layouts
+data_dir:     _data
+includes_dir: _includes
+
 # Handling reading
 exclude: [CNAME, .gitignore, Gemfile, Gemfile.lock]
 encoding: "utf-8"
