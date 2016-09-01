@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Morten Kristensen - Proper multithreading with Qt</title>
+  <meta name="author" content="Morten Kristensen" />
+  <meta name="description" content="The blog of Morten Kristensen" />
+  <link rel="canonical" href="http://nullpointer.dk/2013/03/06/proper-multithreading-with-qt/" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/atom+xml" title="Morten Kristensen" href="http://nullpointer.dk/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha256-k2/8zcNbxVIh5mnQ52A0r3a6jAgMGxFJFE2707UxGCk= sha512-ZV9KawG2Legkwp3nAlxLIVFudTauWuBpC10uEafMHYL0Sarrz5A7G79kXh5+5+woxQ5HM559XX2UZjMJ36Wplg==" crossorigin="anonymous">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    
+    <img src="http://www.gravatar.com/avatar/77268e36fb81d8421b553f0bccceb69c?s=250" id="gravatar" alt="My photo"/>
+    
+  </a>
+  <h2>I'm <a href="/">Morten Kristensen</a>.</h2>
+  <div id="bio">
+    <p>C++, Python, Emacs, Clang, CMake, and other technobabble..</p>
+  </div>
+  <div id="social">
+    Follow me:
+<div id="stalker">
+  
+  <a title="netromdk on Github" href="https://github.com/netromdk">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="Morten Kristensen on Stack Overflow" href="http://stackoverflow.com/users/642148">
+    <i class="fa fa-stack-overflow"></i>
+  </a>
+  
+
+  
+  <a title="netromdk on Twitter" href="https://twitter.com/netromdk">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Morten Kristensen on LinkedIn" href="https://www.linkedin.com/in/mortenslotkristensen">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Atom feed" id="atom" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+  
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+  March 06, 2013 
+  <a href="/">
+    <i class="home fa fa-home"></i>
+  </a>
+  <br/>
+  Tags:
+  
+    <a href="/tag/qt" class="tag">qt</a>
+  
+    <a href="/tag/concurrency" class="tag">concurrency</a>
+  
+</p>
+
+<h1 class="title">Proper multithreading with Qt</h1>
+
+<div id="post">
+  <p><strong>QThread</strong> should be viewed as the mediator with the OS of the new thread and not as being the actual thread itself!</p>
+
+<ul>
+  <li>Don’t subclass QThread only to extend the actual thread implementation which is hardly ever necessary.</li>
+  <li>Create a QObject custom class that does what should be done and has a public slot for processing.</li>
+  <li>Create a QThread and custom instance, call <code class="highlighter-rouge">custom-&gt;moveToThread(thread)</code>.</li>
+  <li>Connect signals from thread to custom instance, started/finished along with <code class="highlighter-rouge">deleteLater()</code> invocations.</li>
+  <li>Finally call <code class="highlighter-rouge">thread-&gt;start()</code>.</li>
+</ul>
+
+<p>AND very important to not allocate on heap in the constructor of the custom class only on the stack. Objects can be allocated on the heap when the public slot is called, and thus the context is the new thread and not the “home thread”.</p>
+
+</div>
+
+<div id="related">
+  <h3>Related Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>29 Aug 2016 &raquo;</span> <a href="/2016/08/29/rewamped-for-github/">Rewamped for GitHub</a>
+    </li>
+    
+    <li>
+      <span>03 Mar 2013 &raquo;</span> <a href="/2013/03/03/unleashing-the-power-of-gdb-part2/">Unleashing the Power of GDB (part 2)</a>
+    </li>
+    
+    <li>
+      <span>12 Feb 2013 &raquo;</span> <a href="/2013/02/12/unleashing-the-power-of-gdb/">Unleashing the Power of GDB</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+
+  <p>
+    © Morten Kristensen, 2016
+  </p>
+</div>
+
+      </div>
+    </div>
+  </div>
+
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Morten Kristensen - Unleashing the Power of GDB (part 2)</title>
+  <meta name="author" content="Morten Kristensen" />
+  <meta name="description" content="The blog of Morten Kristensen" />
+  <link rel="canonical" href="http://nullpointer.dk/2013/03/03/unleashing-the-power-of-gdb-part2/" />
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans:600,800" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="/favicon.png">
+  <link rel="alternate" type="application/atom+xml" title="Morten Kristensen" href="http://nullpointer.dk/atom.xml" />
+
+  <link rel="stylesheet" href="/assets/css/all.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha256-k2/8zcNbxVIh5mnQ52A0r3a6jAgMGxFJFE2707UxGCk= sha512-ZV9KawG2Legkwp3nAlxLIVFudTauWuBpC10uEafMHYL0Sarrz5A7G79kXh5+5+woxQ5HM559XX2UZjMJ36Wplg==" crossorigin="anonymous">
+</head>
+<body>
+  <div class="container">
+    <div class="four columns sidebar">
+      <nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    
+    <img src="http://www.gravatar.com/avatar/77268e36fb81d8421b553f0bccceb69c?s=250" id="gravatar" alt="My photo"/>
+    
+  </a>
+  <h2>I'm <a href="/">Morten Kristensen</a>.</h2>
+  <div id="bio">
+    <p>C++, Python, Emacs, Clang, CMake, and other technobabble..</p>
+  </div>
+  <div id="social">
+    Follow me:
+<div id="stalker">
+  
+  <a title="netromdk on Github" href="https://github.com/netromdk">
+    <i class="fa fa-github-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+
+  
+  <a title="Morten Kristensen on Stack Overflow" href="http://stackoverflow.com/users/642148">
+    <i class="fa fa-stack-overflow"></i>
+  </a>
+  
+
+  
+  <a title="netromdk on Twitter" href="https://twitter.com/netromdk">
+    <i class="fa fa-twitter-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Morten Kristensen on LinkedIn" href="https://www.linkedin.com/in/mortenslotkristensen">
+    <i class="fa fa-linkedin-square"></i>
+  </a>
+  
+
+  
+
+  
+
+  
+  <a title="Atom feed" id="atom" href="/atom.xml">
+    <i class="fa fa-rss-square"></i>
+  </a>
+  
+</div>
+
+  </div>
+</nav>
+
+    </div>
+
+    <div class="eleven columns content">
+      <p class="meta">
+  March 03, 2013 
+  <a href="/">
+    <i class="home fa fa-home"></i>
+  </a>
+  <br/>
+  Tags:
+  
+    <a href="/tag/gdb" class="tag">gdb</a>
+  
+    <a href="/tag/debugging" class="tag">debugging</a>
+  
+    <a href="/tag/c++" class="tag">c++</a>
+  
+    <a href="/tag/gcc" class="tag">gcc</a>
+  
+</p>
+
+<h1 class="title">Unleashing the Power of GDB (part 2)</h1>
+
+<div id="post">
+  <p>The GNU Debugger<a href="http://sourceware.org/gdb/current/onlinedocs/gdb/index.html#Top" target="_blank"><sup>[1]</sup></a> is my favorite debugging tool and I personally think it’s essential for any *nix developer to know how to use it properly if you’re working with C/C++, D, Go, Obj-C, Fortran, Pascal, Modula-2 or Ada<a href="http://sourceware.org/gdb/current/onlinedocs/gdb/Supported-Languages.html#Supported-Languages"><sup>[2]</sup></a>.</p>
+
+<p>This is the second part of <em>Unleashing the power of GDB</em>. It is recommended reading the <a href="/2013/02/12/unleashing-the-power-of-gdb/">first part</a> before proceeding. First section is about integrating GDB with Emacs, the second is about how to debug errors as they occur with common cases and the last section is about debugging without any debug symbols.</p>
+
+<h4>Integration with Emacs</h4>
+<p>GDB is taken to the next level when used together with my favorite editor Emacs<a href="http://www.gnu.org/software/emacs/" target="_blank"><sup>[3]</sup></a> because it adds autocompletion of commands and arguments, and easy stepping in the command history - saves a lot of time. But perhaps even more important: If the program is compiled with debugging symbols it will also load and show the source code. Thus hitting breakpoints and stepping through the program will show the placement in the source code as well.</p>
+
+<p>Let’s take the first snippet of code from the previous article:</p>
+
+<div class="language-c++ highlighter-rouge"><pre class="highlight"><code><span class="cp">#include &lt;string&gt;
+#include &lt;iostream&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">func2</span><span class="p">(</span><span class="k">const</span> <span class="n">string</span> <span class="o">&amp;</span><span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"func2 says: "</span> <span class="o">&lt;&lt;</span> <span class="n">str</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">func1</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">string</span> <span class="n">str</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s">"$"</span><span class="p">);</span>
+  <span class="n">func2</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">func1</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">5</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>And compile it:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>g++ -g -o <span class="nb">test </span>test.cpp
+</code></pre>
+</div>
+
+<p>Open Emacs if you didn’t use it already to save the file. Hit <code class="highlighter-rouge">M-x gdb &lt;RET&gt;</code> to fire up the GDB mode. I recommend using the most recent GDB (7.5+) together with Emacs because it works better.</p>
+
+<p>Give the following arguments to the GDB mode:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb -i<span class="o">=</span>mi /path/to/program
+</code></pre>
+</div>
+
+<p>The current working directory is the directory of the file being edited when going into GDB mode. So if editing <code class="highlighter-rouge">/tmp/test.cpp</code> then <code class="highlighter-rouge">gdb -i=mi test</code> will run <code class="highlighter-rouge">/tmp/test</code>.</p>
+
+<p>Note that the above assumed Emacs version 24. If you are running previous versions you can use this instead:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb --annotate<span class="o">=</span>3 /path/to/program
+</code></pre>
+</div>
+
+<p>Thanks to <em>Paw</em> for pointing that out.</p>
+
+<p>Let’s break at the main function:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="o">(</span>gdb<span class="o">)</span> b main
+<span class="o">(</span>gdb<span class="o">)</span> r
+</code></pre>
+</div>
+
+<p>If you see the following error while running on OSX:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>Starting program: /x/y/foo
+Unable to find Mach task port <span class="k">for </span>process-id 76352: <span class="o">(</span>os/kern<span class="o">)</span> failure <span class="o">(</span>0x5<span class="o">)</span>.
+ <span class="o">(</span>please check gdb is codesigned - see taskgated<span class="o">(</span>8<span class="o">))</span>
+</code></pre>
+</div>
+
+<p>Then you might want to follow <a href="http://sourceware.org/gdb/wiki/BuildingOnDarwin" target="_blank">these instructions</a> to give GDB the necessary rights for debugging (you have to sign the GDB executable).</p>
+
+<p>This is how it looks with my Emacs configuration:
+<a href="/images/gdb-emacs.png"><img src="/images/gdb-emacs.png" alt="GDB in Emacs" /></a></p>
+
+<h4>Inspecting actual bugs</h4>
+<p>Now I’ll show some typical programming bugs and how to spot and fix them using GDB. Suppose you have written a program but you get the following error when running it:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>./prog1
+segmentation fault  ./prog1
+</code></pre>
+</div>
+
+<p>Note that the error might be displayed in various of ways. A segmentation fault happens but you will be wondering what caused it so we fire up GDB:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb ./prog1
+Reading symbols <span class="k">for </span>shared libraries ... <span class="k">done</span>
+<span class="o">(</span>gdb<span class="o">)</span> r
+Starting program: /private/tmp/prog1 
+Reading symbols <span class="k">for </span>shared libraries ++............................. <span class="k">done
+
+</span>Program received signal EXC_BAD_ACCESS, Could not access memory.
+Reason: KERN_INVALID_ADDRESS at address: 0x0000000000000000
+0x0000000100000f27 <span class="k">in </span>main <span class="o">(</span><span class="nv">argc</span><span class="o">=</span>1, <span class="nv">argv</span><span class="o">=</span>0x7fff5fbffa78<span class="o">)</span> at prog1.cpp:3
+3	  <span class="k">*</span>ptr <span class="o">=</span> 1;
+<span class="o">(</span>gdb<span class="o">)</span> p ptr
+<span class="nv">$1</span> <span class="o">=</span> <span class="o">(</span>int <span class="k">*</span><span class="o">)</span> 0x0
+</code></pre>
+</div>
+
+<p>First it is observed that we are denied access to some memory at address <code class="highlighter-rouge">0x0..0</code> and that it’s the line <code class="highlighter-rouge">*ptr = 1</code> (prog1.cpp:3) that caused it. So we already know from the error message that <code class="highlighter-rouge">ptr</code> must then be a null-pointer but we double-check by inspecting it with <code class="highlighter-rouge">p ptr</code>.</p>
+
+<p>Another example might be the following:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>./prog2
+prog2<span class="o">(</span>12673<span class="o">)</span> malloc: <span class="k">***</span> error <span class="k">for </span>object 0x7ffd08c03930: pointer being freed was not allocated
+<span class="k">***</span> <span class="nb">set </span>a breakpoint <span class="k">in </span>malloc_error_break to debug
+abort      ./prog2
+</code></pre>
+</div>
+
+<p>From the error message we now know that some unallocated memory was freed. It also gives a tip on where to start debugging, so let’s do just that:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb ./prog2
+Reading symbols <span class="k">for </span>shared libraries ... <span class="k">done</span>
+<span class="o">(</span>gdb<span class="o">)</span> b malloc_error_break
+Function <span class="s2">"malloc_error_break"</span> not defined.
+Make breakpoint pending on future shared library load? <span class="o">(</span>y or <span class="o">[</span>n]<span class="o">)</span> y
+Breakpoint 1 <span class="o">(</span>malloc_error_break<span class="o">)</span> pending.
+<span class="o">(</span>gdb<span class="o">)</span> r
+Starting program: /private/tmp/prog2 
+Reading symbols <span class="k">for </span>shared libraries ++............................. <span class="k">done
+</span>Breakpoint 1 at 0x7fff9439b558
+Pending breakpoint 1 - <span class="s2">"malloc_error_break"</span> resolved
+prog2<span class="o">(</span>12693<span class="o">)</span> malloc: <span class="k">***</span> error <span class="k">for </span>object 0x100103920: pointer being freed was not allocated
+<span class="k">***</span> <span class="nb">set </span>a breakpoint <span class="k">in </span>malloc_error_break to debug
+
+Breakpoint 1, 0x00007fff9439b558 <span class="k">in </span>malloc_error_break <span class="o">()</span>
+<span class="o">(</span>gdb<span class="o">)</span> bt
+<span class="c">#0  0x00007fff9439b558 in malloc_error_break ()</span>
+<span class="c">#1  0x00007fff9439c912 in free ()</span>
+<span class="c">#2  0x0000000100000f03 in main (argc=1, argv=0x7fff5fbffa78) at prog2.cpp:4</span>
+<span class="o">(</span>gdb<span class="o">)</span> f 2
+<span class="c">#2  0x0000000100000f03 in main (argc=1, argv=0x7fff5fbffa78) at prog2.cpp:4</span>
+4	  delete[] txt;  
+<span class="o">(</span>gdb<span class="o">)</span> l
+1	int main<span class="o">(</span>int argc, char <span class="k">**</span>argv<span class="o">)</span> <span class="o">{</span>
+2	  char <span class="k">*</span>txt <span class="o">=</span> new char[128];
+3	  delete[] txt;
+4	  delete[] txt;  
+5	  <span class="k">return </span>0;
+6	<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>So we set a pending breakpoint, start the program, find the frame and observe the double <code class="highlighter-rouge">delete[]</code> on line 3 and 4.</p>
+
+<p>A third possibility is a floating point exception:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>./prog3
+floating point exception  ./prog3
+</code></pre>
+</div>
+
+<p>Using GDB we immediately see the problem:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb ./prog3
+Reading symbols <span class="k">for </span>shared libraries ... <span class="k">done</span>
+<span class="o">(</span>gdb<span class="o">)</span> r
+Starting program: /private/tmp/prog3 
+Reading symbols <span class="k">for </span>shared libraries ++............................. <span class="k">done
+
+</span>Program received signal EXC_ARITHMETIC, Arithmetic exception.
+0x0000000100000f38 <span class="k">in </span>main <span class="o">(</span><span class="nv">argc</span><span class="o">=</span>1, <span class="nv">argv</span><span class="o">=</span>0x7fff5fbffa78<span class="o">)</span> at prog3.cpp:3
+3	  <span class="k">return </span>a / 0;
+</code></pre>
+</div>
+
+<p>Which in this case is a division-by-zero error. Pay attention to the warnings your compiler issues to avoid these things. It might have looked like this:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>prog3.cpp:3: warning: division by zero <span class="k">in</span> ‘a / 0’
+</code></pre>
+</div>
+
+<p>Note that these are just examples of runtime errors. A lot more exist that I have not covered here.</p>
+
+<h4>Debugging with no debugging symbols</h4>
+<p>Sometimes the program you are debugging has no symbol table and you still have to locate the problem. It might be that you are debugging a third party binary so you don’t have access to the source code. <b>This section will be a bit advanced.</b></p>
+
+<p>Let’s start with the first problematic program from last section: <code class="highlighter-rouge">prog1</code>. This is what GDB tells us with no debug symbols:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb ./prog1
+Reading symbols <span class="k">for </span>shared libraries ... <span class="k">done</span>
+<span class="o">(</span>gdb<span class="o">)</span> r
+Starting program: /private/tmp/prog1 
+Reading symbols <span class="k">for </span>shared libraries ++............................. <span class="k">done
+
+</span>Program received signal EXC_BAD_ACCESS, Could not access memory.
+Reason: KERN_INVALID_ADDRESS at address: 0x0000000000000000
+0x0000000100000f27 <span class="k">in </span>main <span class="o">()</span>
+</code></pre>
+</div>
+
+<p>Unfortunately we cannot inspect the source code but instead we can inspect the machine code by disassembling a section of memory into symbolic language:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="o">(</span>gdb<span class="o">)</span> disas
+Dump of assembler code <span class="k">for function </span>main:
+0x0000000100000f10 &lt;main+0&gt;:	push   %rbp
+0x0000000100000f11 &lt;main+1&gt;:	mov    %rsp,%rbp
+0x0000000100000f14 &lt;main+4&gt;:	mov    %edi,-0x4<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f17 &lt;main+7&gt;:	mov    %rsi,-0x10<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f1b &lt;main+11&gt;:	movq   <span class="nv">$0x0</span>,-0x20<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f23 &lt;main+19&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000f27 &lt;main+23&gt;:	movl   <span class="nv">$0x1</span>,<span class="o">(</span>%rax<span class="o">)</span>
+0x0000000100000f2d &lt;main+29&gt;:	movl   <span class="nv">$0x0</span>,-0x18<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f34 &lt;main+36&gt;:	mov    -0x18<span class="o">(</span>%rbp<span class="o">)</span>,%eax
+0x0000000100000f37 &lt;main+39&gt;:	mov    %eax,-0x14<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f3a &lt;main+42&gt;:	mov    -0x14<span class="o">(</span>%rbp<span class="o">)</span>,%eax
+0x0000000100000f3d &lt;main+45&gt;:	pop    %rbp
+0x0000000100000f3e &lt;main+46&gt;:	retq   
+End of assembler dump.
+</code></pre>
+</div>
+
+<p>Let us focus around the reported address <code class="highlighter-rouge">0x0000000100000f27</code>:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="o">(</span>gdb<span class="o">)</span> disas 0x0000000100000f1b 0x0000000100000f2d
+Dump of assembler code from 0x100000f1b to 0x100000f2d:
+0x0000000100000f1b &lt;main+11&gt;:	movq   <span class="nv">$0x0</span>,-0x20<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f23 &lt;main+19&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000f27 &lt;main+23&gt;:	movl   <span class="nv">$0x1</span>,<span class="o">(</span>%rax<span class="o">)</span>
+End of assembler dump.
+</code></pre>
+</div>
+
+<p>On the third line the pointer is accessed and <code class="highlighter-rouge">1</code> is attempted saved at the location. So this information can be given to the third party. However, we actually know the source code so I’ll show the parallels:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>movq   <span class="nv">$0x0</span>,-0x20<span class="o">(</span>%rbp<span class="o">)</span>            int <span class="k">*</span>ptr <span class="o">=</span> 0;
+mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax            // Put addr 0 <span class="k">in</span> %rax
+movl   <span class="nv">$0x1</span>,<span class="o">(</span>%rax<span class="o">)</span>                 <span class="k">*</span>ptr <span class="o">=</span> 1;
+</code></pre>
+</div>
+
+<p>On the first line <code class="highlighter-rouge">0</code> is saved at <code class="highlighter-rouge">-0x20(%rbp)</code>, line two moves the address (<code class="highlighter-rouge">0</code>) to <code class="highlighter-rouge">%rax</code> and the third line tries to dereference the null-pointer and assign <code class="highlighter-rouge">1</code> to it.</p>
+
+<p>Let us try to do the same thing for <code class="highlighter-rouge">prog2</code>:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb ./prog2
+Reading symbols <span class="k">for </span>shared libraries ... <span class="k">done</span>
+<span class="o">(</span>gdb<span class="o">)</span> b malloc_error_break
+Function <span class="s2">"malloc_error_break"</span> not defined.
+Make breakpoint pending on future shared library load? <span class="o">(</span>y or <span class="o">[</span>n]<span class="o">)</span> y
+Breakpoint 1 <span class="o">(</span>malloc_error_break<span class="o">)</span> pending.
+<span class="o">(</span>gdb<span class="o">)</span> r
+Starting program: /private/tmp/prog2 
+Reading symbols <span class="k">for </span>shared libraries ++............................. <span class="k">done
+</span>Breakpoint 1 at 0x7fff9439b558
+Pending breakpoint 1 - <span class="s2">"malloc_error_break"</span> resolved
+prog2<span class="o">(</span>15026<span class="o">)</span> malloc: <span class="k">***</span> error <span class="k">for </span>object 0x100103920: pointer being freed was not allocated
+<span class="k">***</span> <span class="nb">set </span>a breakpoint <span class="k">in </span>malloc_error_break to debug
+
+Breakpoint 1, 0x00007fff9439b558 <span class="k">in </span>malloc_error_break <span class="o">()</span>
+<span class="o">(</span>gdb<span class="o">)</span> bt
+<span class="c">#0  0x00007fff9439b558 in malloc_error_break ()</span>
+<span class="c">#1  0x00007fff9439c912 in free ()</span>
+<span class="c">#2  0x0000000100000f03 in main ()</span>
+</code></pre>
+</div>
+
+<p>The exception arises on address <code class="highlighter-rouge">0x0000000100000f03</code>, so again we have to disassemble to make sense of it:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="o">(</span>gdb<span class="o">)</span> disas
+Dump of assembler code <span class="k">for function </span>main:
+0x0000000100000eb0 &lt;main+0&gt;:	push   %rbp
+0x0000000100000eb1 &lt;main+1&gt;:	mov    %rsp,%rbp
+0x0000000100000eb4 &lt;main+4&gt;:	sub    <span class="nv">$0x20</span>,%rsp
+0x0000000100000eb8 &lt;main+8&gt;:	mov    %edi,%eax
+0x0000000100000eba &lt;main+10&gt;:	mov    %eax,-0x4<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000ebd &lt;main+13&gt;:	mov    %rsi,-0x10<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000ec1 &lt;main+17&gt;:	mov    <span class="nv">$0x80</span>,%rax
+0x0000000100000ecb &lt;main+27&gt;:	mov    %rax,%rdi
+0x0000000100000ece &lt;main+30&gt;:	callq  0x100000f20 &lt;dyld_stub__Znam&gt;
+0x0000000100000ed3 &lt;main+35&gt;:	mov    %rax,-0x20<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000ed7 &lt;main+39&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000edb &lt;main+43&gt;:	cmp    <span class="nv">$0x0</span>,%rax
+0x0000000100000edf &lt;main+47&gt;:	je     0x100000eed &lt;main+61&gt;
+0x0000000100000ee1 &lt;main+49&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000ee5 &lt;main+53&gt;:	mov    %rax,%rdi
+0x0000000100000ee8 &lt;main+56&gt;:	callq  0x100000f1a &lt;dyld_stub__ZdaPv&gt;
+0x0000000100000eed &lt;main+61&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000ef1 &lt;main+65&gt;:	cmp    <span class="nv">$0x0</span>,%rax
+0x0000000100000ef5 &lt;main+69&gt;:	je     0x100000f03 &lt;main+83&gt;
+0x0000000100000ef7 &lt;main+71&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000efb &lt;main+75&gt;:	mov    %rax,%rdi
+0x0000000100000efe &lt;main+78&gt;:	callq  0x100000f1a &lt;dyld_stub__ZdaPv&gt;
+0x0000000100000f03 &lt;main+83&gt;:	movl   <span class="nv">$0x0</span>,-0x18<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f0a &lt;main+90&gt;:	mov    -0x18<span class="o">(</span>%rbp<span class="o">)</span>,%eax
+0x0000000100000f0d &lt;main+93&gt;:	mov    %eax,-0x14<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f10 &lt;main+96&gt;:	mov    -0x14<span class="o">(</span>%rbp<span class="o">)</span>,%eax
+0x0000000100000f13 &lt;main+99&gt;:	add    <span class="nv">$0x20</span>,%rsp
+0x0000000100000f17 &lt;main+103&gt;:	pop    %rbp
+0x0000000100000f18 &lt;main+104&gt;:	retq   
+End of assembler dump.
+</code></pre>
+</div>
+
+<p>This is a large chunk but I will point out the important little details. The following line calls <code class="highlighter-rouge">new[]</code>:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>0x0000000100000ece &lt;main+30&gt;:	callq  0x100000f20 &lt;dyld_stub__Znam&gt;
+</code></pre>
+</div>
+
+<p>The reason is that <code class="highlighter-rouge">_Znam</code> actually means <code class="highlighter-rouge">operator new[](unsigned long)</code>. <em>You can use the tool <code class="highlighter-rouge">c++filt</code> or <a href="http://slush.warosu.org/c++filtjs/" target="_blank">this site</a> to do demangle symbols.</em></p>
+
+<p>And here are the double deletions:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>0x0000000100000ee8 &lt;main+56&gt;:	callq  0x100000f1a &lt;dyld_stub__ZdaPv&gt;
+0x0000000100000efe &lt;main+78&gt;:	callq  0x100000f1a &lt;dyld_stub__ZdaPv&gt;
+</code></pre>
+</div>
+
+<p><code class="highlighter-rouge">_ZdaPv</code> means <code class="highlighter-rouge">operator delete[](void*)</code>. In both cases they are passed the same address by the following instructions:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>0x0000000100000ee1 &lt;main+49&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000ee5 &lt;main+53&gt;:	mov    %rax,%rdi
+</code></pre>
+</div>
+
+<p>And here as well:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>0x0000000100000ef7 &lt;main+71&gt;:	mov    -0x20<span class="o">(</span>%rbp<span class="o">)</span>,%rax
+0x0000000100000efb &lt;main+75&gt;:	mov    %rax,%rdi
+</code></pre>
+</div>
+
+<p>The third program with the floating-point exception is debugged in the following way without symbols:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>gdb ./prog3
+Reading symbols <span class="k">for </span>shared libraries ... <span class="k">done</span>
+<span class="o">(</span>gdb<span class="o">)</span> r
+Starting program: /private/tmp/prog3 
+Reading symbols <span class="k">for </span>shared libraries ++............................. <span class="k">done
+
+</span>Program received signal EXC_ARITHMETIC, Arithmetic exception.
+0x0000000100000f38 <span class="k">in </span>main <span class="o">()</span>
+</code></pre>
+</div>
+
+<p>Once again it is necessary to disassemble:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="o">(</span>gdb<span class="o">)</span> disas
+Dump of assembler code <span class="k">for function </span>main:
+0x0000000100000f20 &lt;main+0&gt;:	push   %rbp
+0x0000000100000f21 &lt;main+1&gt;:	mov    %rsp,%rbp
+0x0000000100000f24 &lt;main+4&gt;:	mov    %edi,-0x4<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f27 &lt;main+7&gt;:	mov    %rsi,-0x10<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f2b &lt;main+11&gt;:	movl   <span class="nv">$0xff</span>,-0x1c<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f32 &lt;main+18&gt;:	mov    -0x1c<span class="o">(</span>%rbp<span class="o">)</span>,%eax
+0x0000000100000f35 &lt;main+21&gt;:	xor    %ecx,%ecx
+0x0000000100000f37 &lt;main+23&gt;:	cltd   
+0x0000000100000f38 &lt;main+24&gt;:	idiv   %ecx
+0x0000000100000f3a &lt;main+26&gt;:	mov    %eax,-0x18<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f3d &lt;main+29&gt;:	mov    %eax,-0x14<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f40 &lt;main+32&gt;:	mov    -0x14<span class="o">(</span>%rbp<span class="o">)</span>,%eax
+0x0000000100000f43 &lt;main+35&gt;:	pop    %rbp
+0x0000000100000f44 &lt;main+36&gt;:	retq   
+End of assembler dump.
+</code></pre>
+</div>
+
+<p>The interesting lines are these with the exception happening on the last line:</p>
+
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>0x0000000100000f2b &lt;main+11&gt;:	movl   <span class="nv">$0xff</span>,-0x1c<span class="o">(</span>%rbp<span class="o">)</span>
+0x0000000100000f32 &lt;main+18&gt;:	mov    -0x1c<span class="o">(</span>%rbp<span class="o">)</span>,%eax
+0x0000000100000f35 &lt;main+21&gt;:	xor    %ecx,%ecx
+0x0000000100000f37 &lt;main+23&gt;:	cltd   
+0x0000000100000f38 &lt;main+24&gt;:	idiv   %ecx
+</code></pre>
+</div>
+
+<p>This basically does the operation <code class="highlighter-rouge">0xFF / 0</code>. <code class="highlighter-rouge">0xFF</code> is saved to <code class="highlighter-rouge">-0x1c(%rbp)</code> and moved to <code class="highlighter-rouge">%eax</code>, then <code class="highlighter-rouge">0</code> is “created” by doing an XOR on <code class="highlighter-rouge">%ecx</code> with itself (recall that XOR on two equal operands always yields <code class="highlighter-rouge">0</code>) and storing in <code class="highlighter-rouge">%ecx</code>, <code class="highlighter-rouge">cltd</code> converts signed long word <code class="highlighter-rouge">%eax</code> to a double word in <code class="highlighter-rouge">%edx:%eax</code> and finally <code class="highlighter-rouge">idiv</code> does the signed division.</p>
+
+<p>Stay tuned for more.</p>
+
+</div>
+
+<div id="related">
+  <h3>Related Posts</h3>
+  <ul class="posts">
+    
+    <li>
+      <span>29 Aug 2016 &raquo;</span> <a href="/2016/08/29/rewamped-for-github/">Rewamped for GitHub</a>
+    </li>
+    
+    <li>
+      <span>06 Mar 2013 &raquo;</span> <a href="/2013/03/06/proper-multithreading-with-qt/">Proper multithreading with Qt</a>
+    </li>
+    
+    <li>
+      <span>12 Feb 2013 &raquo;</span> <a href="/2013/02/12/unleashing-the-power-of-gdb/">Unleashing the Power of GDB</a>
+    </li>
+    
+  </ul>
+</div>
+
+
+      <div class="footer">
+        <div class="disclaimer">
+  
+
+  <p>
+    © Morten Kristensen, 2016
+  </p>
+</div>
+
+      </div>
+    </div>
+  </div>
+
+
+</body>
+</html>
