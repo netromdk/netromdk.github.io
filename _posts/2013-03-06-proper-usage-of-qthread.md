@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Proper multithreading with Qt"
+title:  "Proper usage of QThread"
 date:   2013-03-06 16:13:10 +0200
 tags:   qt concurrency
 ---
