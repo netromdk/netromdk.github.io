@@ -1,6 +1,9 @@
 # General Jekyll Config
 url: http://nullpointer.dk
 
+# Run in safe mode like github pages is.
+safe: true
+
 # Where things are
 source:       .
 destination:  ./_site
