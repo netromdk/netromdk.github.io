@@ -12,4 +12,11 @@ title: Blog Posts
     </li>
     {% endfor %}
   </ul>
+
+  <h2><i class="fa fa-bookmark"></i> Blog Tags</h2>
+  <ul id="blog-posts" class="posts">
+    {% for tag in site.data.tags %}
+      <a href="/tag/{{ tag.slug }}/">{{ tag.name }}</a>&nbsp;
+    {% endfor %}
+  </ul>
 </div>
