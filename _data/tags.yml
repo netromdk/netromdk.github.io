@@ -1,0 +1,38 @@
+- slug: github-pages
+  name: GitHub Pages
+
+- slug: jekyll
+  name: Jekyll
+
+- slug: profiling
+  name: Profiling
+
+- slug: c++
+  name: C++
+
+- slug: xcode
+  name: Xcode
+
+- slug: sed
+  name: sed
+
+- slug: bsd
+  name: BSD
+
+- slug: gnu
+  name: GNU
+
+- slug: gdb
+  name: GDB
+
+- slug: debugging
+  name: Debugging
+
+- slug: gcc
+  name: GCC
+
+- slug: qt
+  name: Qt
+
+- slug: concurrency
+  name: Concurrency
