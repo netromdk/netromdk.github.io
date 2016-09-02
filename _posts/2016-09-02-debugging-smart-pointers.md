@@ -2,7 +2,7 @@
 layout: post
 title:  "Debugging Smart Pointers"
 date:   2016-09-02 23:36:02 +0200
-tags:   lldb debugging c++ c++14 clang
+tags:   lldb debugging c++ c++14
 ---
 
 In recent years I have switched to using [LLDB][lldb] (of the [LLVM][llvm] project) as my primary debugger. In this post I'll show how to debug instances of [std::shared_ptr][sptr] and [std::unique_ptr][uptr], and what the differences are.
