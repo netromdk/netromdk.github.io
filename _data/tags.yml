@@ -10,6 +10,15 @@
 - slug: c++
   name: C++
 
+- slug: c++11
+  name: C++11
+
+- slug: c++14
+  name: C++14
+
+- slug: c++17
+  name: C++17
+
 - slug: xcode
   name: Xcode
 
@@ -25,11 +34,17 @@
 - slug: gdb
   name: GDB
 
+- slug: lldb
+  name: LLDB
+
 - slug: debugging
   name: Debugging
 
 - slug: gcc
   name: GCC
+
+- slug: clang
+  name: Clang
 
 - slug: qt
   name: Qt
