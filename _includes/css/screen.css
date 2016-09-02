@@ -171,7 +171,7 @@ nav h1, nav h2 {
 .footer {
   font-size: 80%;
   color: #666;
-  border-top: 4px solid #EEE;
+  border-top: 1px solid #EEE;
   overflow: hidden;
 }
 
@@ -233,12 +233,6 @@ i.fa-hn {
 
 .home:hover {
   text-decoration: none;
-}
-
-.disclaimer p {
-  margin-top: 5px;
-  font-size: 11px;
-  text-align: center;
 }
 
 .footnotes {
