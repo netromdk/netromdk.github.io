@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "Debugging Smart Pointers"
+title:  "LLDB: Debugging Smart Pointers"
 date:   2016-09-02 23:36:02 +0200
-tags:   lldb debugging c++ c++14
+tags:   lldb debugging c++ c++14 clang gcc
 ---
 
 In recent years I have switched to using [LLDB][lldb] (of the [LLVM][llvm] project) as my primary debugger. In this post I'll show how to debug instances of [std::shared_ptr][sptr] and [std::unique_ptr][uptr], and what the differences are.
@@ -26,7 +26,7 @@ int main() {
 }
 ```
 
-Compile the program as `pointers` with debugging symbols and let's load it up with LLDB:
+Compile the program as `pointers` with debugging symbols. The compiler must be [C++14][c++14] compliant like [Clang 3.4+][clang] or [GCC 4.9+][gcc] due to the usage of [std::make_unique][make_unique]. Let's load it up with LLDB:
 
 ```shell
 % lldb ./pointers
@@ -119,3 +119,7 @@ Instead we have to reference the `__first_` member, but can still use the addres
 [llvm]: http://llvm.org
 [sptr]: http://en.cppreference.com/w/cpp/memory/shared_ptr
 [uptr]: http://en.cppreference.com/w/cpp/memory/unique_ptr
+[make_unique]: http://en.cppreference.com/w/cpp/memory/unique_ptr/make_unique
+[c++14]: https://isocpp.org/wiki/faq/cpp14
+[clang]: http://clang.llvm.org
+[gcc]: https://gcc.gnu.org
