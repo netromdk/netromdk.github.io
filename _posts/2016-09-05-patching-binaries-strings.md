@@ -5,7 +5,7 @@ date:   2016-09-05 22:31:40 +0200
 tags:   patching c++ python lldb disassembling
 ---
 
-_Patching Binaries_ will be a series of articles about how to extract information and modify program behavior. It focuses on the [MachO][macho] executable format but the techniques are similar for other formats.
+_Patching Binaries_ will be a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format but the techniques are similar for other formats.
 
 _The files used in this article can be found [here](https://github.com/netromdk/patching/tree/master/strings)._
 
@@ -68,7 +68,7 @@ We now know that there are two "interesting" strings at offset `1f50` and `1f65`
 
 The next natural thing to do is modifying the strings. I wrote a python script "patch.py" to patch a binary at an offset with a new string.
 
-Let's change the first string to become `"Hello, World!"` (note that the length of the string is 20 characters so we put some spaces at the end):
+Let's change the first string to become `"Hello, World!"`:
 
 ```shell
 % ./patch.py test 0x1f50 "Hello, World!       "
@@ -84,6 +84,8 @@ And a char* string, too.
 ```
 
 Voila!
+
+Note that the size of the string we patched is 20 bytes, which means the value to overwrite it cannot be longer than that. To visually clear the old value we put spaces as padding at the end. 
 
 The contents of the binary are now changed to the following:
 
@@ -189,7 +191,7 @@ password`main:
     0x100000743 <+243>: 48 8d 05 e9 17 00 00  leaq   0x17e9(%rip), %rax        ; "AK9FJ31P"
 ```
 
-We know that `"AK9FJ31P"` resides at offset `1f33` but here it uses `17e9`, why? To understant this it is necessary to know that it uses relative addressing. So the `leaq` (load effective address) is invoked at `743` and if we add that to `17e9` then we get `1f2c`. That's still not the correct offset! However, looking at the assembly code we see that it uses 7 bytes, and now the equation fits: `743+7+17e9=1f33`!
+We know that `"AK9FJ31P"` resides at offset `1f33` but here it uses `17e9`, why? To understand this it is necessary to know that it uses relative addressing. So the `leaq` (load effective address) is invoked at `743` and if we add that to `17e9` then we get `1f2c`. That's still not the correct offset! However, looking at the assembly code we see that it uses 7 bytes, and now the equation fits: `743+7+17e9=1f33`!
 
-[macho]: https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/MachORuntime/
+[mach-o]: https://en.wikipedia.org/wiki/Mach-O
 [lldb]: http://lldb.llvm.org
