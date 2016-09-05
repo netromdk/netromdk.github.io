@@ -193,5 +193,63 @@ password`main:
 
 We know that `"AK9FJ31P"` resides at offset `1f33` but here it uses `17e9`, why? To understand this it is necessary to know that it uses relative addressing. So the `leaq` (load effective address) is invoked at `743` and if we add that to `17e9` then we get `1f2c`. That's still not the correct offset! However, looking at the assembly code we see that it uses 7 bytes, and now the equation fits: `743+7+17e9=1f33`!
 
+_Note that we used an unstripped binary for this example, which means it still contains useful information. However, with a real-world example it will most likely be stripped of symbols._
+
+Let's remove the symbols:
+
+```shell
+% strip password
+```
+
+Now when we try to hook up on the `main()` it is evident that we can't because the symbol is not known:
+
+```shell
+% lldb ./password
+(lldb) target create "./password"
+Current executable set to './password' (x86_64).
+(lldb) b main
+Breakpoint 1: no locations (pending).
+WARNING:  Unable to resolve breakpoint to any actual locations.
+```
+
+Instead we will run the program until it asks for the password and then break to see a backtrace to get our bearings:
+
+```shell
+(lldb) r
+Process 86636 launched: './password' (x86_64)
+Password: Process 86636 stopped
+* thread #1: tid = 0x225927, 0x00007fff9218df8a libsystem_kernel.dylib`__read_nocancel + 10, stop reason = signal SIGSTOP
+    frame #0: 0x00007fff9218df8a libsystem_kernel.dylib`__read_nocancel + 10
+libsystem_kernel.dylib`__read_nocancel:
+->  0x7fff9218df8a <+10>: jae    0x7fff9218df94            ; <+20>
+    0x7fff9218df8c <+12>: movq   %rax, %rdi
+    0x7fff9218df8f <+15>: jmp    0x7fff921887cd            ; cerror_nocancel
+    0x7fff9218df94 <+20>: retq
+(lldb) bt
+* thread #1: tid = 0x225927, 0x00007fff9218df8a libsystem_kernel.dylib`__read_nocancel + 10, stop reason = signal SIGSTOP
+  * frame #0: 0x00007fff9218df8a libsystem_kernel.dylib`__read_nocancel + 10
+    frame #1: 0x00007fff8d103155 libsystem_c.dylib`_sread + 16
+    frame #2: 0x00007fff8d102769 libsystem_c.dylib`__srefill1 + 24
+    frame #3: 0x00007fff8d102884 libsystem_c.dylib`__srget + 14
+    frame #4: 0x00007fff8d0fe52b libsystem_c.dylib`getc + 52
+    frame #5: 0x00007fff8dd38051 libc++.1.dylib`std::__1::__stdinbuf<char>::__getchar(bool) + 119
+    frame #6: 0x00007fff8dd2ee4c libc++.1.dylib`std::__1::basic_istream<char, std::__1::char_traits<char> >::sentry::sentry(std::__1::basic_istream<char, std::__1::char_traits<char> >&, bool) + 200
+    frame #7: 0x000000010000089e password`___lldb_unnamed_symbol3$$password + 46
+    frame #8: 0x0000000100000737 password`___lldb_unnamed_symbol1$$password + 231
+    frame #9: 0x00007fff9a14a5ad libdyld.dylib`start + 1
+```
+
+The backtrace shows two function calls in our `password` executable. Taking a look at frame 8 shows the same location we used previously to argument about the address of the constant string being loaded:
+
+```frame
+(lldb) f 8
+frame #8: 0x0000000100000737 password`___lldb_unnamed_symbol1$$password + 231
+password`___lldb_unnamed_symbol1$$password:
+    0x100000737 <+231>: movq   %rax, -0xb0(%rbp)
+    0x10000073e <+238>: jmp    0x100000743               ; <+243>
+    0x100000743 <+243>: leaq   0x17e9(%rip), %rax        ; "AK9FJ31P"
+    0x10000074a <+250>: leaq   -0x88(%rbp), %rcx
+```
+
 [mach-o]: https://en.wikipedia.org/wiki/Mach-O
 [lldb]: http://lldb.llvm.org
