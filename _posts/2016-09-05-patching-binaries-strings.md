@@ -64,7 +64,7 @@ To understand the layout of the binary block above the strings are end-to-end:
 
 _Notice the zero byte for termination at the end of each string!_
 
-We now know that there are two "interesting" strings at offset `1f50` and `1f60`, which means if we read the binary's data at those positions we will find the strings.
+We now know that there are two "interesting" strings at offset `1f50` and `1f65`, which means if we read the binary's data at those positions we will find the strings.
 
 The next natural thing to do is modifying the strings. I wrote a python script "patch.py" to patch a binary at an offset with a new string.
 
