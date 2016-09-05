@@ -54,3 +54,12 @@
 
 - slug: sigs
   name: Sigs
+
+- slug: python
+  name: Python
+
+- slug: disassembling
+  name: Disassembling
+
+- slug: patching
+  name: Patching
