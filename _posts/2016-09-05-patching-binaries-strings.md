@@ -9,7 +9,7 @@ _Patching Binaries_ will be a series of articles about how to extract informatio
 
 _The files used in this article can be found [here](https://github.com/netromdk/patching/tree/master/strings)._
 
-One of the first things to look at in a binary, when trying to determine information about it, is the constant strings saved within it. In MachO binaries these can be found in section `__cstring` of segment `__TEXT`.
+One of the first things to look at in a binary, when trying to determine information about it, is the constant strings saved within it. In Mach-O binaries these can be found in section `__cstring` of segment `__TEXT`.
 
 Compile the example program "test.cc" as "test" and run it:
 
