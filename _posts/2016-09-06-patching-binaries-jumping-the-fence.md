@@ -170,7 +170,7 @@ The 25 NOPs are easily spotted.
 
 Recompile and strip the "verify" program again to get rid of the NOPs.
 
-Another approach is to insert a jump instruction that takes us directly to `0x10000110f`. We want to insert the jump at `0x1000010f6` where we have 3 bytes of room to change, so a relative jump would count from the next instruction (after inserting) to `0x10000110f`. Since we are within a one-byte short jump distance of +/-128 we can use a `JMP rel8` with jump instruction opcode `0xeb` (for other jump instructions take a look [here][x86-jumps]). This leaves one byte dangling which we will with a NOP. However, this effectively will change the address of the next instruction after our JMP to be `0x1000010f8`. The distance from that to `0x10000110f` is `0x17=23`, which means we will insert the bytes `eb 17 90` at `0x1000010f6`.
+Another approach is to insert a jump instruction that takes us directly to `0x10000110f`. We want to insert the jump at `0x1000010f6` where we have 3 bytes of room to change, so a relative jump would count from the next instruction (after inserting) to `0x10000110f`. Since we are within a one-byte short jump distance of +/-128 we can use a `JMP rel8` with jump instruction opcode `0xeb` (for other jump instructions take a look [here][x86-jumps]). This leaves one byte dangling which we will fill with a NOP. However, this effectively will change the address of the next instruction after our JMP to be `0x1000010f8`. The distance from that to `0x10000110f` is `0x17=23`, which means we will insert the bytes `eb 17 90` at `0x1000010f6`.
 
 I wrote another script, "patch_bytes.py", that will allow us to insert those bytes:
 
