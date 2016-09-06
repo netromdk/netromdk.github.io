@@ -2,10 +2,10 @@
 layout: post
 title:  "Patching Binaries: Strings"
 date:   2016-09-05 22:31:40 +0200
-tags:   patching c++ python lldb disassembling
+tags:   patching x86 c++ python lldb disassembling
 ---
 
-_Patching Binaries_ will be a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format but the techniques are similar for other formats.
+_Patching Binaries_ will be a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format for the [x86][x86] architecture, but the techniques are similar for other formats.
 
 _The files used in this article can be found [here](https://github.com/netromdk/patching/tree/master/strings)._
 
@@ -251,5 +251,6 @@ password`___lldb_unnamed_symbol1$$password:
     0x10000074a <+250>: leaq   -0x88(%rbp), %rcx
 ```
 
+[x86]: https://en.wikipedia.org/wiki/X86
 [mach-o]: https://en.wikipedia.org/wiki/Mach-O
 [lldb]: http://lldb.llvm.org
