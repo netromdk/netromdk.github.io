@@ -251,6 +251,8 @@ password`___lldb_unnamed_symbol1$$password:
     0x10000074a <+250>: leaq   -0x88(%rbp), %rcx
 ```
 
+Continue to read the [second part]({% post_url 2016-09-06-patching-binaries-jumping-the-fence %}) about "jumping the fence" by employing jumps and bypassing instructions.
+
 [x86]: https://en.wikipedia.org/wiki/X86
 [mach-o]: https://en.wikipedia.org/wiki/Mach-O
 [lldb]: http://lldb.llvm.org
