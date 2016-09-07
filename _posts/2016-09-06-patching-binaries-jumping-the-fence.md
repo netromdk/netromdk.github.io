@@ -221,6 +221,8 @@ Take a look in particular at the following to view our inserted instructions:
 0x1000010f8 <+56>:  90                    nop
 ```
 
+Continue to read the [third part]({% post_url 2016-09-07-patching-binaries-live-modification %}) about changing values in a program, and live modification of the memory of a running program.
+
 [x86]: https://en.wikipedia.org/wiki/X86
 [x86-jumps]: http://x86.renejeschke.de/html/file_module_x86_id_147.html
 [mach-o]: https://en.wikipedia.org/wiki/Mach-O
