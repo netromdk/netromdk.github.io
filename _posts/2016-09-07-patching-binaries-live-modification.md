@@ -91,7 +91,7 @@ Recompile and strip "score.cc" to get back to square one.
 
 So let's try changing the score right after it is set to `1` but before being used. As we saw before the value is saved into `-0x8(%rbp)` which we first have to understand what it means. The _RBP_ (base pointer) register holds the pointer to the beginning of a stack frame while executing a function. Allocating on the stack is done by using a proper offset from the RBP, and since addresses grow upwards we use a negative addressing of `-0x8` in this case.
 
-In order do go further we need the value of the RBP register:
+In order to go further we need the value of the RBP register:
 
 ```shell
 % lldb score
@@ -187,7 +187,7 @@ Process 40286 exited with status = 0 (0x00000000)
 (lldb) exit
 ```
 
-Another approach is to start LLDB in a wait-for-process state where it will attach once a program with the given process name has been started. Something to note, though, is that the address `0x100001164` of before won't work in this example due to how it attaches to the process. Instead we use the fact that `main()` is the first function so we can name it in LLDB as `___lldb_unnamed_function1$$score`. Also, since it attached to a running program we don't have to start the process so we just continue after setting the break point. Finally, because we know that the original `0x100001164` is 36 instructions after the start of `main()` we set a break point using RIP (instruction pointer) with `$rip+36`.
+Another approach is to start LLDB in a wait-for-process state where it will attach once a program with the given process name has been started. Something to note, though, is that the address `0x100001164` of before won't work in this example due to how it attaches to the process. Instead we use the fact that `main()` is the first function so we can name it in LLDB as `___lldb_unnamed_function1$$score`. Also, since it attaches to a running program we don't have to start the process so we just continue after setting the break point. Finally, because we know that the original `0x100001164` is 36 instructions after the start of `main()` we set a break point using the RIP (instruction pointer) register with `$rip+36`.
 
 Create file "waitsetvalue.lldb" with the following contents:
 
