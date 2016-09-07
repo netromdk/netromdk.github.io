@@ -7,6 +7,8 @@ tags:   patching x86 c++ python lldb disassembling
 
 _Patching Binaries_ is a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format for the [x86][x86] architecture, but the techniques are similar for other formats.
 
+Before proceeding it is recommended reading the [second part]({% post_url 2016-09-06-patching-binaries-jumping-the-fence %}) about jumping and bypassing instructions.
+
 _The files used in this article can be found [here](https://github.com/netromdk/patching/tree/master/live)._
 
 This article is about how to change data values of a program and how to read from and write to memory of a live program to change its behavior.
