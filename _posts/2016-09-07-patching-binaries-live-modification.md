@@ -262,7 +262,123 @@ Finally, in the second terminal, it will output:
 score = 42
 ```
 
-Phew! That concludes data manipulation of live processes.
+Phew!
+
+The last example is attaching to a program after it has started. Compile "looper.cc" as "looper" and strip it. Then run it in a terminal:
+
+```shell
+% ./looper
+score = 20
+score = 20
+score = 20
+...
+```
+
+Open another terminal and attach to the process:
+
+```shell
+% lldb -p `pgrep looper`
+(lldb) process attach --pid 49530
+Process 49530 stopped
+* thread #1: tid = 0x2b5010, 0x00007fff9218e10a libsystem_kernel.dylib`__semwait_signal + 10, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+    frame #0: 0x00007fff9218e10a libsystem_kernel.dylib`__semwait_signal + 10
+libsystem_kernel.dylib`__semwait_signal:
+->  0x7fff9218e10a <+10>: jae    0x7fff9218e114            ; <+20>
+    0x7fff9218e10c <+12>: movq   %rax, %rdi
+    0x7fff9218e10f <+15>: jmp    0x7fff921887f2            ; cerror
+    0x7fff9218e114 <+20>: retq
+
+Executable module set to "/Users/netrom/git/patching/live/./looper".
+Architecture set to: x86_64h-apple-macosx.
+(lldb)
+```
+
+To get our bearings we backtrace, select the main `looper` function and disassemble:
+
+```shell
+(lldb) bt
+* thread #1: tid = 0x2b5010, 0x00007fff9218e10a libsystem_kernel.dylib`__semwait_signal + 10, queue = 'com.apple.main-thread', stop reason = signal SIGSTOP
+  * frame #0: 0x00007fff9218e10a libsystem_kernel.dylib`__semwait_signal + 10
+    frame #1: 0x00007fff8d13ed0f libsystem_c.dylib`nanosleep + 199
+    frame #2: 0x00007fff8d13eb6f libsystem_c.dylib`sleep + 42
+    frame #3: 0x000000010aa3c171 looper`___lldb_unnamed_function1$$looper + 81
+    frame #4: 0x00007fff9a14a5ad libdyld.dylib`start + 1
+(lldb) f 3
+frame #3: 0x000000010aa3c171 looper`___lldb_unnamed_function1$$looper + 81
+looper`___lldb_unnamed_function1$$looper:
+    0x10aa3c171 <+81>: movl   %eax, -0x14(%rbp)
+    0x10aa3c174 <+84>: jmp    0x10aa3c136               ; <+22>
+    0x10aa3c179 <+89>: nop
+    0x10aa3c17a <+90>: nop
+(lldb) dis
+looper`___lldb_unnamed_function1$$looper:
+    0x10aa3c120 <+0>:  pushq  %rbp
+    0x10aa3c121 <+1>:  movq   %rsp, %rbp
+    0x10aa3c124 <+4>:  subq   $0x20, %rsp
+    0x10aa3c128 <+8>:  movl   $0x0, -0x4(%rbp)
+    0x10aa3c12f <+15>: movl   $0x14, -0x8(%rbp)
+    0x10aa3c136 <+22>: movq   0xec3(%rip), %rdi         ; (void *)0x00007fff78ba32f8: std::__1::cout
+    0x10aa3c13d <+29>: leaq   0xe2c(%rip), %rsi         ; "score = "
+    0x10aa3c144 <+36>: callq  0x10aa3c180               ; ___lldb_unnamed_function2$$looper
+    0x10aa3c149 <+41>: movl   -0x8(%rbp), %esi
+    0x10aa3c14c <+44>: movq   %rax, %rdi
+    0x10aa3c14f <+47>: callq  0x10aa3cd80               ; symbol stub for: std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(int)
+    0x10aa3c154 <+52>: leaq   0xe1e(%rip), %rsi         ; "'\n'"
+    0x10aa3c15b <+59>: movq   %rax, %rdi
+    0x10aa3c15e <+62>: callq  0x10aa3c180               ; ___lldb_unnamed_function2$$looper
+    0x10aa3c163 <+67>: movl   $0x1, %edi
+    0x10aa3c168 <+72>: movq   %rax, -0x10(%rbp)
+    0x10aa3c16c <+76>: callq  0x10aa3cdb6               ; symbol stub for: sleep
+    0x10aa3c171 <+81>: movl   %eax, -0x14(%rbp)
+    0x10aa3c174 <+84>: jmp    0x10aa3c136               ; <+22>
+```
+
+Since the program is already doing loops we have to break somewhere inside it, and it makes most sense to do it right where it reads the score value:
+
+```shell
+(lldb) dis -b -c 1 -s 0x10aa3c149
+looper`___lldb_unnamed_function1$$looper:
+    0x10aa3c149 <+41>: 8b 75 f8  movl   -0x8(%rbp), %esi
+```
+
+So we set a break point at `0x10aa3c149` and reach it:
+
+```shell
+(lldb) b 0x10aa3c149
+Breakpoint 1: where = looper`___lldb_unnamed_function1$$looper + 41, address = 0x000000010aa3c149
+(lldb) c
+Process 49530 resuming
+Process 49530 stopped
+* thread #1: tid = 0x2b5010, 0x000000010aa3c149 looper`___lldb_unnamed_function1$$looper + 41, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
+    frame #0: 0x000000010aa3c149 looper`___lldb_unnamed_function1$$looper + 41
+looper`___lldb_unnamed_function1$$looper:
+->  0x10aa3c149 <+41>: movl   -0x8(%rbp), %esi
+    0x10aa3c14c <+44>: movq   %rax, %rdi
+    0x10aa3c14f <+47>: callq  0x10aa3cd80               ; symbol stub for: std::__1::basic_ostream<char, std::__1::char_traits<char> >::operator<<(int)
+    0x10aa3c154 <+52>: leaq   0xe1e(%rip), %rsi         ; "'\n'"
+```
+
+The last thing to do is change the value and detach from the process:
+
+```shell
+(lldb) p *(int*)(`$rbp`-8) = 42
+(int) $1 = 42
+(lldb) detach
+Process 49530 detached
+```
+
+Finally, in the first terminal, it continually uses the changed value:
+
+```shell
+...
+score = 20
+score = 42
+score = 42
+score = 42
+...
+```
+
+That concludes data manipulation of live processes.
 
 [x86]: https://en.wikipedia.org/wiki/X86
 [mach-o]: https://en.wikipedia.org/wiki/Mach-O
