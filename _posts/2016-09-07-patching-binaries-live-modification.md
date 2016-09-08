@@ -2,10 +2,10 @@
 layout: post
 title:  "Patching Binaries: Live Modification"
 date:   2016-09-07 23:35:59 +0200
-tags:   patching x86 c++ python lldb disassembling
+tags:   patching x86-64 c++ python lldb disassembling
 ---
 
-_Patching Binaries_ is a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format for the [x86][x86] architecture, but the techniques are similar for other formats.
+_Patching Binaries_ is a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format for the [x86-64][x86-64] architecture, but the techniques are similar for other formats.
 
 Before proceeding it is recommended reading the [second part]({% post_url 2016-09-06-patching-binaries-jumping-the-fence %}) about jumping and bypassing instructions.
 
@@ -380,6 +380,6 @@ score = 42
 
 That concludes data manipulation of live processes.
 
-[x86]: https://en.wikipedia.org/wiki/X86
+[x86-64]: https://en.wikipedia.org/wiki/X86-64
 [mach-o]: https://en.wikipedia.org/wiki/Mach-O
 [lldb]: http://lldb.llvm.org

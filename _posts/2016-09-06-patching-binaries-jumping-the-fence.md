@@ -2,10 +2,10 @@
 layout: post
 title:  "Patching Binaries: Jumping The Fence"
 date:   2016-09-06 21:43:55 +0200
-tags:   patching x86 c++ python lldb disassembling
+tags:   patching x86-64 c++ python lldb disassembling
 ---
 
-_Patching Binaries_ is a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format for the [x86][x86] architecture, but the techniques are similar for other formats.
+_Patching Binaries_ is a series of articles about how to extract information and modify program behavior. It focuses on the Mac [Mach-O][mach-o] executable format for the [x86-64][x86-64] architecture, but the techniques are similar for other formats.
 
 Before proceeding it is recommended reading the [first part]({% post_url 2016-09-05-patching-binaries-strings %}) about the fundamentals of finding and changing constant strings in binaries.
 
@@ -223,7 +223,7 @@ Take a look in particular at the following to view our inserted instructions:
 
 Continue to read the [third part]({% post_url 2016-09-07-patching-binaries-live-modification %}) about changing values in a program, and live modification of the memory of a running program.
 
-[x86]: https://en.wikipedia.org/wiki/X86
+[x86-64]: https://en.wikipedia.org/wiki/X86-64
 [x86-jumps]: http://x86.renejeschke.de/html/file_module_x86_id_147.html
 [mach-o]: https://en.wikipedia.org/wiki/Mach-O
 [lldb]: http://lldb.llvm.org

@@ -64,5 +64,5 @@
 - slug: patching
   name: Patching
 
-- slug: x86
-  name: x86
+- slug: x86-64
+  name: x86-64
